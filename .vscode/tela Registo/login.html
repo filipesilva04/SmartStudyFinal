@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Painel Esquerdo -->
+        <div class="left-panel">
+            <h1>Novo Aqui?</h1>
+            <p>Cria uma conta e aproveita todas as funcionalidades.</p>
+            <a href="index.html"><button class="sign-up-btn">SIGN UP</button></a>
+        </div>
+        
+        <!-- Painel Direito - Login -->
+        <div class="right-panel">
+            <h2>Sign In</h2>
+            <div class="social-icons">
+                <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google"></a>
+                <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png" alt="Facebook"></a>
+                <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/8/81/LinkedIn_icon.svg" alt="LinkedIn"></a>
+            </div>
+            <p>ou usa a tua conta:</p>
+            
+            <form id="login-form">
+                <div class="input-field">
+                    <input type="email" id="email" placeholder="Email" required>
+                </div>
+                <div class="input-field">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="sign-in-btn">SIGN IN</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Adiciona um event listener para capturar o envio do formulário
+        document.getElementById("login-form").addEventListener("submit", function(event) {
+            event.preventDefault(); // Previne o envio do formulário
+
+            // Obtém os valores dos campos de email e senha
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            // Aqui você pode adicionar validação real de login, por exemplo:
+            if (email && password) {
+                // Simula um login bem-sucedido (pode adicionar a verificação real aqui)
+                alert("Login bem-sucedido!");
+
+                // Redireciona para a página principal
+                window.location.href = "paginaprincipal.html"; // Verifique o caminho correto
+            } else {
+                alert("Por favor, insira seu e-mail e senha.");
+            }
+        });
+    </script>
+</body>
+</html>

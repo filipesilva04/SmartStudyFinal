@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página Principal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="paginaprincipal.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+
+<body>
+  <div class="sidebar">
+    <div>
+      <div class="logo-container">
+        <img src="logo.png" alt="Logo da App">
+      </div>
+      <div class="menu">
+        
+        <div class="menu-item" id="menuPrevisao">Previsão</div>
+
+        <div class="menu-item expand" id="menuGestaoExpand">Gestão de Dados</div>
+<div class="submenu" id="submenuGestao">
+  <div class="menu-item" id="menuCarregarDados">Carregar Dados</div>
+  <div class="menu-item" id="menuVisualizarDados">Visualizar Dados</div>
+</div>
+
+      </div>
+    </div>
+
+    <div class="bottom-menu">
+      <div class="menu-item" id="menuSuporte">Suporte</div>
+      <div class="menu-item" id="menuDefinicoes">Definições</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Home Content -->
+    <div id="homeContent">
+      <h1>Bem-vindo à SmartStudy!</h1>
+      <p>Selecione uma funcionalidade no menu lateral.</p>
+    </div>
+
+   
+    <!-- Previsão Content -->
+    <!-- Tela de Previsão de Resultados -->
+    <div id="previsaoContent" class="hidden">
+      <div class="previsao-container">
+        <h1>Previsão de Desempenho Acadêmico</h1>
+        <p>Selecione um dos ficheiros CSV que carregou para aplicar o modelo preditivo e ver os resultados.</p>
+    
+        <!-- Selecionar ficheiro -->
+        <div class="selecao-csv">
+          <label for="selectCsv">Escolha um ficheiro CSV:</label>
+          <select id="selectCsv">
+            <option disabled selected>-- selecione um ficheiro --</option>
+          </select>
+          <button id="btnPrever" class="btn-prever">Executar Previsão</button>
+        </div>
+    
+        <!-- Feedback visual -->
+        <div id="loadingIndicador" class="hidden loading">
+          <i class="fas fa-spinner fa-spin"></i> A processar previsão...
+        </div>
+    
+        <!-- Resultados principais -->
+        <div id="resumoResultados" class="hidden resumo-box">
+          <h3>Resumo da Previsão:</h3>
+          <ul>
+            <li><strong>Aprovado:</strong> <span id="aprovadoCount">0</span></li>
+            <li><strong>Em Risco:</strong> <span id="riscoCount">0</span></li>
+            <li><strong>Chumbado:</strong> <span id="chumbadoCount">0</span></li>
+          </ul>
+        </div>
+    
+        <!-- Lista de previsões (exemplo) -->
+        <div id="tabelaResultados" class="hidden tabela-preview">
+          <h3>Amostra dos Resultados:</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Aluno</th>
+                <th>Previsão</th>
+              </tr>
+            </thead>
+            <tbody id="previewPrevisoes">
+              <!-- Linhas adicionadas via JS -->
+            </tbody>
+          </table>
+        </div>
+    
+        <!-- Exportar resultado completo -->
+        <div id="exportBox" class="hidden">
+          <button id="btnExportarCSV" class="exportar-btn">Exportar Resultados para CSV</button>
+        </div>
+      </div>
+    </div>
+    
+  
+
+    <!-- Gestão de Dados Content -->
+    <div id="gestaoDadosContent" class="hidden">
+      <h1>Gestão de Dados</h1>
+      <p>Carregue ou visualize seus dados CSV aqui.</p>
+    </div>
+
+    <!-- suporte Content -->
+    <div id="suporteContent" class="hidden">
+        <div class="support-container">
+          <h1 class="title">Suporte ao Cliente</h1>
+          <p class="description">Se você tiver algum problema, nossa equipe de suporte está pronta para ajudar. Entre em contato conosco por e-mail ou telefone, ou descreva seu problema abaixo.</p>
+      
+          <!-- Informações de contato com ícones -->
+          <div class="contact-info">
+            <div class="contact-item">
+              <i class="fas fa-envelope"></i>
+              <p><strong>Email:</strong> support@smartstudy.com</p>
+            </div>
+            <div class="contact-item">
+              <i class="fas fa-phone-alt"></i>
+              <p><strong>Telefone:</strong> +123 456 7890</p>
+            </div>
+          </div>
+      
+          <!-- Formulário de contato -->
+          <div class="form-container">
+            <label for="problema" class="label">Descreva seu problema:</label>
+            <textarea id="problema" class="textarea" placeholder="Descreva aqui o seu problema..."></textarea>
+            <button id="enviarProblema" class="send-button">Enviar</button>
+          </div>
+        </div>
+      </div>
+      
+  
+  
+
+    
+ <!-- Definições Content -->
+<div id="definicoesContent" class="hidden">
+    <h1>Definições</h1>
+    <p>Personalize as configurações da aplicação.</p>
+    
+    <div class="settings-section">
+      <h2>Alterar Nome</h2>
+      <label for="inputNome">Novo Nome:</label>
+      <input type="text" id="inputNome" placeholder="Digite seu novo nome">
+      <button id="salvarNome">Salvar Nome</button>
+    </div>
+    
+    <div class="settings-section">
+      <h2>Alterar Senha</h2>
+      <label for="inputSenhaAtual">Senha Atual:</label>
+      <input type="password" id="inputSenhaAtual" placeholder="Digite sua senha atual">
+      
+      <label for="inputNovaSenha">Nova Senha:</label>
+      <input type="password" id="inputNovaSenha" placeholder="Digite sua nova senha">
+      
+      <label for="inputConfirmaSenha">Confirmar Nova Senha:</label>
+      <input type="password" id="inputConfirmaSenha" placeholder="Confirme sua nova senha">
+      
+      <button id="salvarSenha">Salvar Senha</button>
+    </div>
+    
+    <!-- Novas opções adicionadas -->
+    <!-- Substitui apenas essa parte na seção de Definições (linha do botão) -->
+    <div class="settings-section">
+      <h2>Alternância de Modo</h2>
+      <label class="switch">
+        <input type="checkbox" id="toggleDarkMode">
+        <span class="slider round"></span>
+      </label>
+      <span style="margin-left: 10px;">Modo Escuro</span>
+    </div>
+  
+  
+    <div class="settings-section">
+      <h2>Outras Configurações</h2>
+      <button id="salvarConfiguracoes">Salvar Configurações</button>
+    </div>
+  </div>
+  
+
+<!-- Carregar Dados Content -->
+<div id="carregarDadosContent" class="hidden">
+    <h1>Carregar Ficheiro de Dados</h1>
+    <p>Faça upload de um ficheiro .CSV contendo os dados dos estudantes. Certifique-se de que está no formato correto.</p>
+  
+    <!-- Área de upload estilizada -->
+    <div class="upload-card" id="uploadArea">
+      <div class="upload-icon">
+        <i class="fas fa-file-upload"></i>
+      </div>
+      <p class="upload-text">
+        Clique aqui para selecionar um ficheiro CSV<br>
+        <span class="subtext">ou arraste e solte aqui</span>
+      </p>
+      <input type="file" id="csvFile" accept=".csv" hidden>
+    </div>
+  
+    <!-- Apenas UMA VEZ -->
+    <div id="fileInfo" class="file-info hidden">
+      <p><strong>Ficheiro:</strong> <span id="fileName">Nenhum ficheiro selecionado</span></p>
+    </div>
+  
+    <div id="previewTable" class="preview hidden">
+      <h3>Pré-visualização dos dados:</h3>
+      <table id="csvPreviewTable">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  
+  
+  
+  <!-- Visualizar Dados Content -->
+  <div id="visualizarDadosContent" class="hidden">
+    <div class="visualizar-container">
+      <div class="visualizar-header">
+        <h1>Visualizar Ficheiros Carregados</h1>
+        <p>Abaixo está listada a relação dos ficheiros CSV que foram carregados para a aplicação.</p>
+        <input type="text" id="pesquisaFicheiro" placeholder="Pesquisar ficheiro...">
+      </div>
+  
+      <form id="ficheirosForm">
+        <table class="tabela-ficheiros">
+          <thead>
+            <tr>
+              <th>Selecionar</th>
+              <th>Nome do Ficheiro</th>
+            </tr>
+          </thead>
+          <tbody id="listaFicheiros">
+            <tr>
+              <td><input type="checkbox" class="ficheiroCheckbox"></td>
+              <td>dados_alunos_2024.csv</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="ficheiroCheckbox"></td>
+              <td>notas_primeiro_semestre.csv</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="ficheiroCheckbox"></td>
+              <td>desempenho_geral.csv</td>
+            </tr>
+          </tbody>
+        </table>
+  
+        <button type="button" id="eliminarSelecionados" class="botao-eliminar">
+          Eliminar Selecionados
+        </button>
+      </form>
+    </div>
+  </div>
+  
+  
+    
+  
+  
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
+
+</html>

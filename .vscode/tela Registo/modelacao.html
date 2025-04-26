@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tela de Modelação</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="paginaprincipal.css">
+</head>
+
+<body>
+  <div class="sidebar">
+    <div>
+      <div class="logo-container">
+        <img src="logo.png" alt="Logo da App">
+      </div>
+      <div class="menu">
+        <div class="menu-item">Modelação</div>
+        <div class="menu-item">Previsão</div>
+
+        <div class="menu-item expand" id="menuGestaoExpand">Gestão de Dados</div>
+        <div class="submenu" id="submenuGestao">
+          <div class="menu-item" id="menuCarregarDados">Carregar Dados</div>
+          <div class="menu-item" id="menuVisualizarDados">Visualizar Dados</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-menu">
+      <div class="menu-item">Suporte</div>
+      <div class="menu-item">Definições</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <h1>Modelação de Dados</h1>
+    <p>Escolha o modelo a ser utilizado e inicie o treinamento.</p>
+
+    <div class="input-field">
+      <label for="modelo">Escolha o Modelo:</label>
+      <select id="modelo">
+        <option value="regressao">Regressão</option>
+        <option value="classificacao">Classificação</option>
+        <option value="clustering">Clustering</option>
+      </select>
+    </div>
+
+    <button type="button" class="btn" id="treinarBtn">Treinar Modelo</button>
+
+    <div id="progresso" class="hidden">
+      <p>Treinando...</p>
+      <progress id="barraProgresso" value="0" max="100"></progress>
+    </div>
+
+    <div id="resultados" class="hidden">
+      <h2>Resultados do Modelo</h2>
+      <p>Precisão: 85%</p>
+      <p>Erro: 15%</p>
+    </div>
+
+    <div class="buttons">
+      <button class="btn" id="salvarModelo">Salvar Modelo</button>
+      <button class="btn" id="resetar">Resetar</button>
+    </div>
+  </div>
+</body>
+
+</html>
