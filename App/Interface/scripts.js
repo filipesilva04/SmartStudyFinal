@@ -175,16 +175,41 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Suporte: envio de problema
-    document.getElementById('enviarProblema').addEventListener('click', function() {
-        var problema = document.getElementById('problema').value;
 
-        if (problema.trim() === "") {
-            alert("Por favor, descreva seu problema antes de enviar.");
-        } else {
-            alert("Problema enviado com sucesso! Nossa equipe entrará em contato em breve.");
-            document.getElementById('problema').value = "";
-        }
-    });
+    const btnSuporte = document.getElementById('enviarProblema');
+    if (btnSuporte && !btnSuporte.dataset.listenerAttached) {
+        btnSuporte.addEventListener('click', async function () {
+            const problema = document.getElementById('problema').value;
+
+            if (problema.trim() === "") {
+                alert("Por favor, descreva seu problema antes de enviar.");
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:3000/suporte", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ mensagem: problema })
+                });
+
+                const data = await response.json();
+                alert(data.message);
+
+                if (response.ok) {
+                    document.getElementById('problema').value = "";
+                }
+            } catch (error) {
+                console.error("Erro ao enviar suporte:", error);
+                alert("Erro ao enviar mensagem de suporte.");
+            }
+        });
+
+        btnSuporte.dataset.listenerAttached = true;
+    }
+
+    
+
 
     // 🌟 Upload de ficheiro interativo
     const uploadCard = document.getElementById('uploadArea');
