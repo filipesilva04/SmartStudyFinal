@@ -162,6 +162,8 @@ app.put('/update-password', async (req, res) => {
 
 // ================= SUPORTE =================
 app.post('/suporte', (req, res) => {
+    console.log("BODY RECEBIDO NO BACKEND:", req.body);  // <--- linha nova
+
     const { mensagem } = req.body;
 
     if (!mensagem || mensagem.trim() === "") {
