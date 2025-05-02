@@ -159,45 +159,55 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Idioma
+    document.getElementById('idiomaSelect')?.addEventListener('change', function() {
+        var idiomaSelecionado = this.value;
+        alert("Idioma alterado para: " + idiomaSelecionado);
+    });
+
+    // Notificações
+    document.getElementById('notificacoes')?.addEventListener('change', function() {
+        if (this.checked) {
+            alert("Notificações ativadas.");
+        } else {
+            alert("Notificações desativadas.");
+        }
+    });
 
     // Suporte: envio de problema
 
-    document.getElementById('menuSuporte')?.addEventListener('click', function () {
-        showContent('suporteContent');
-    
-        const btnSuporte = document.getElementById('enviarProblema');
-        if (btnSuporte && !btnSuporte.dataset.listenerAttached) {
-            btnSuporte.addEventListener('click', async function () {
-                const problema = document.getElementById('problema')?.value;
-    
-                if (!problema || problema.trim() === "") {
-                    alert("Por favor, descreva seu problema antes de enviar.");
-                    return;
+    const btnSuporte = document.getElementById('enviarProblema');
+    if (btnSuporte && !btnSuporte.dataset.listenerAttached) {
+        btnSuporte.addEventListener('click', async function () {
+            const problema = document.getElementById('problema').value;
+
+            if (problema.trim() === "") {
+                alert("Por favor, descreva seu problema antes de enviar.");
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:3000/suporte", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ mensagem: problema })
+                });
+
+                const data = await response.json();
+                alert(data.message);
+
+                if (response.ok) {
+                    document.getElementById('problema').value = "";
                 }
-    
-                try {
-                    const response = await fetch("http://localhost:3000/suporte", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ mensagem: problema })
-                    });
-    
-                    const data = await response.json();
-                    alert(data.message);
-    
-                    if (response.ok) {
-                        document.getElementById('problema').value = "";
-                    }
-                } catch (error) {
-                    console.error("Erro ao enviar suporte:", error);
-                    alert("Erro ao enviar mensagem de suporte.");
-                }
-            });
-    
-            btnSuporte.dataset.listenerAttached = "true";
-        }
-    });
-    
+            } catch (error) {
+                console.error("Erro ao enviar suporte:", error);
+                alert("Erro ao enviar mensagem de suporte.");
+            }
+        });
+
+        btnSuporte.dataset.listenerAttached = true;
+    }
+
     
 
 
@@ -288,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    pesquisaInput.addEventListener("input", function() {
+    pesquisaInput?.addEventListener("input", function() {
         renderizarLista(this.value);
     });
 
@@ -321,10 +331,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const option = document.createElement("option");
         option.value = nome;
         option.textContent = nome;
-        selectFicheiro.appendChild(option);
+        selectFicheiro?.appendChild(option);
     });
 
-    botaoPrever.addEventListener("click", function () {
+    botaoPrever?.addEventListener("click", function () {
         const nomeFicheiro = selectFicheiro.value;
 
         secaoResultado.classList.remove("hidden");
@@ -356,4 +366,3 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
-
