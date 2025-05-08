@@ -3,21 +3,23 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
 
 app.use(cors());
-
-
 app.use(bodyParser.json());
+app.use('/uploads', express.static('uploads'));
 
 // Ligação à base de dados MySQL
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'fi26lipe', // <-- tua password
-    database: 'smartstudy' // <-- tua base de dados
+    password: 'fi26lipe',
+    database: 'smartstudy'
 });
 
 db.connect((err) => {
@@ -28,6 +30,21 @@ db.connect((err) => {
     }
 });
 
+// =================== MULTER CONFIG ===================
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadDir = 'uploads/';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir);
+        }
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '_' + file.originalname);
+    }
+});
+const upload = multer({ storage });
+
 // ================= ROTA DE TESTE =================
 app.get('/', (req, res) => {
     res.send('Servidor backend SmartStudy está a funcionar!');
@@ -37,13 +54,10 @@ app.get('/', (req, res) => {
 app.post('/register', (req, res) => {
     const { name, email, password } = req.body;
 
-
-
     if (!name || !email || !password) {
         return res.status(400).json({ message: 'Por favor, preencha todos os campos.' });
     }
 
-    // Verificar se o email já existe
     db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
         if (err) {
             console.error('Erro ao verificar email:', err);
@@ -54,10 +68,8 @@ app.post('/register', (req, res) => {
             return res.status(400).json({ message: 'Email já registado.' });
         }
 
-        // Hash da password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Inserir novo utilizador
         db.query('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hashedPassword], (err, result) => {
             if (err) {
                 console.error('Erro ao registar utilizador:', err);
@@ -98,10 +110,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-// ================= INICIAR SERVIDOR =================
-app.listen(port, () => {
-    console.log(`Servidor a correr em http://localhost:${port}`);
-});
 
 // ================= MUDAR NOME =================
 app.put('/update-name', (req, res) => {
@@ -159,10 +167,9 @@ app.put('/update-password', async (req, res) => {
     });
 });
 
-
 // ================= SUPORTE =================
 app.post('/suporte', (req, res) => {
-    console.log("BODY RECEBIDO NO BACKEND:", req.body);  // <--- linha nova
+    console.log("BODY RECEBIDO NO BACKEND:", req.body);
 
     const { mensagem } = req.body;
 
@@ -178,4 +185,56 @@ app.post('/suporte', (req, res) => {
 
         res.status(201).json({ message: 'Mensagem de suporte enviada com sucesso!' });
     });
+});
+
+
+// ================= UPLOAD DE FICHEIROS CSV =================
+
+const csvStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        const uniqueName = Date.now() + '-' + file.originalname;
+        cb(null, uniqueName);
+    }
+});
+
+const csvUpload = multer({ 
+    storage: csvStorage,
+    fileFilter: function (req, file, cb) {
+        if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Apenas ficheiros CSV são permitidos.'), false);
+        }
+    }
+});
+
+app.post('/upload-csv', csvUpload.single('ficheiro_csv'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: 'Nenhum ficheiro foi enviado.' });
+    }
+
+    const nomeFicheiro = req.file.originalname;
+    const caminho = req.file.path;
+
+    db.query(
+        'INSERT INTO csv_uploads (nome_ficheiro, caminho) VALUES (?, ?)',
+        [nomeFicheiro, caminho],
+        (err, result) => {
+            if (err) {
+                console.error('Erro ao guardar CSV na base de dados:', err);
+                return res.status(500).json({ message: 'Erro ao guardar CSV.' });
+            }
+
+            res.status(201).json({ message: 'Ficheiro CSV carregado com sucesso!' });
+        }
+    );
+});
+
+
+// ================= INICIAR SERVIDOR =================
+app.listen(port, () => {
+    console.log(`Servidor a correr em http://localhost:${port}`);
 });

@@ -209,61 +209,78 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     
+    // 🌟 Upload de ficheiro interativo com envio real para o backend
+const uploadCard = document.getElementById('uploadArea');
+const csvInput = document.getElementById('csvFile');
+const fileInfo = document.getElementById('fileInfo');
+const fileNameSpan = document.getElementById('fileName');
 
+uploadCard.addEventListener('click', () => {
+    csvInput.click();
+});
 
-    // 🌟 Upload de ficheiro interativo
-    const uploadCard = document.getElementById('uploadArea');
-    const csvInput = document.getElementById('csvFile');
-    const fileInfo = document.getElementById('fileInfo');
-    const fileNameSpan = document.getElementById('fileName');
+csvInput.addEventListener('change', () => {
+    const file = csvInput.files[0];
+    if (!file) return;
 
-    uploadCard.addEventListener('click', () => {
-        csvInput.click();
-    });
+    fileInfo.classList.remove('hidden');
+    fileNameSpan.textContent = file.name;
 
-    csvInput.addEventListener('change', () => {
-        const file = csvInput.files[0];
-        if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const text = e.target.result;
+        const lines = text.trim().split('\n');
+        const header = lines[0].split(',');
+        const rows = lines.slice(1, 6); // Só mostrar 5 linhas
 
-        fileInfo.classList.remove('hidden');
-        fileNameSpan.textContent = file.name;
+        const thead = document.querySelector('#csvPreviewTable thead');
+        const tbody = document.querySelector('#csvPreviewTable tbody');
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const text = e.target.result;
-            const lines = text.trim().split('\n');
-            const header = lines[0].split(',');
-            const rows = lines.slice(1, 6);
+        thead.innerHTML = '';
+        tbody.innerHTML = '';
 
-            const thead = document.querySelector('#csvPreviewTable thead');
-            const tbody = document.querySelector('#csvPreviewTable tbody');
+        const headerRow = document.createElement('tr');
+        header.forEach(col => {
+            const th = document.createElement('th');
+            th.textContent = col.trim();
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
 
-            thead.innerHTML = '';
-            tbody.innerHTML = '';
-
-            const headerRow = document.createElement('tr');
-            header.forEach(col => {
-                const th = document.createElement('th');
-                th.textContent = col.trim();
-                headerRow.appendChild(th);
+        rows.forEach(line => {
+            const data = line.split(',');
+            const row = document.createElement('tr');
+            data.forEach(cell => {
+                const td = document.createElement('td');
+                td.textContent = cell.trim();
+                row.appendChild(td);
             });
-            thead.appendChild(headerRow);
+            tbody.appendChild(row);
+        });
 
-            rows.forEach(line => {
-                const data = line.split(',');
-                const row = document.createElement('tr');
-                data.forEach(cell => {
-                    const td = document.createElement('td');
-                    td.textContent = cell.trim();
-                    row.appendChild(td);
-                });
-                tbody.appendChild(row);
-            });
+        document.getElementById('previewTable').classList.remove('hidden');
 
-            document.getElementById('previewTable').classList.remove('hidden');
-        };
-        reader.readAsText(file);
-    });
+        // Enviar ficheiro para backend
+        const formData = new FormData();
+        formData.append('ficheiro_csv', file);
+
+        fetch('http://localhost:3000/upload-csv', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);  // Mostra a mensagem de sucesso ou erro
+        })
+        .catch(error => {
+            console.error("Erro ao enviar ficheiro:", error);
+            alert("Erro ao enviar ficheiro para o servidor.");
+        });
+    };
+
+    reader.readAsText(file);
+});
+
 
     // 📁 Visualizar Dados: simulação de ficheiros carregados
     const ficheirosSimulados = [
