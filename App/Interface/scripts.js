@@ -230,7 +230,7 @@ csvInput.addEventListener('change', () => {
     reader.onload = function (e) {
         const text = e.target.result;
         const lines = text.trim().split('\n');
-        const header = lines[0].split(',');
+        const header = lines[0].split(';');
         const rows = lines.slice(1, 6); // Só mostrar 5 linhas
 
         const thead = document.querySelector('#csvPreviewTable thead');
@@ -248,7 +248,7 @@ csvInput.addEventListener('change', () => {
         thead.appendChild(headerRow);
 
         rows.forEach(line => {
-            const data = line.split(',');
+            const data = line.split(';');
             const row = document.createElement('tr');
             data.forEach(cell => {
                 const td = document.createElement('td');
@@ -281,61 +281,79 @@ csvInput.addEventListener('change', () => {
     reader.readAsText(file);
 });
 
+//-----------------VISUALIZAR DADOS----------------------------//
 
-    // 📁 Visualizar Dados: simulação de ficheiros carregados
-    const ficheirosSimulados = [
-        "alunos_1.csv",
-        "estatisticas_matematica.csv",
-        "ano2023_dados.csv"
-    ];
+   // ✅ Função para carregar os ficheiros do backend
+async function carregarFicheiros() {
+    try {
+        const response = await fetch('http://localhost:3000/ficheiros');
+        const ficheiros = await response.json();
+        renderizarTabelaFicheiros(ficheiros);
+    } catch (error) {
+        console.error("Erro ao carregar ficheiros:", error);
+    }
+}
 
-    const listaFicheiros = document.getElementById('listaFicheiros');
-    const pesquisaInput = document.getElementById('pesquisaFicheiros');
-    const btnEliminar = document.getElementById('eliminarSelecionados');
+// ✅ Função para renderizar a tabela com os ficheiros obtidos
+function renderizarTabelaFicheiros(ficheiros) {
+    const lista = document.getElementById('listaFicheiros');
+    lista.innerHTML = '';
 
-    function renderizarLista(filtros = "") {
-        listaFicheiros.innerHTML = "";
+    ficheiros.forEach(f => {
+        const tr = document.createElement('tr');
 
-        ficheirosSimulados
-            .filter(nome => nome.toLowerCase().includes(filtros.toLowerCase()))
-            .forEach(nome => {
-                const li = document.createElement("li");
-                li.classList.add("arquivo-item");
+        const tdCheck = document.createElement('td');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.classList.add('ficheiroCheckbox');
+        checkbox.dataset.id = f.id;
+        tdCheck.appendChild(checkbox);
 
-                const checkbox = document.createElement("input");
-                checkbox.type = "checkbox";
-                checkbox.classList.add("arquivo-check");
+        const tdNome = document.createElement('td');
+        tdNome.textContent = f.nome_ficheiro;
 
-                const nomeSpan = document.createElement("span");
-                nomeSpan.textContent = nome;
+        tr.appendChild(tdCheck);
+        tr.appendChild(tdNome);
+        lista.appendChild(tr);
+    });
+}
 
-                li.appendChild(checkbox);
-                li.appendChild(nomeSpan);
-                listaFicheiros.appendChild(li);
-            });
+// ✅ Eliminar ficheiros selecionados
+document.getElementById('eliminarSelecionados').addEventListener('click', async () => {
+    const selecionados = Array.from(document.querySelectorAll('.ficheiroCheckbox:checked'));
+
+    if (selecionados.length === 0) {
+        alert("Selecione pelo menos um ficheiro para eliminar.");
+        return;
     }
 
-    pesquisaInput?.addEventListener("input", function() {
-        renderizarLista(this.value);
-    });
+    const ids = selecionados.map(cb => cb.dataset.id);
 
-    btnEliminar.addEventListener("click", function() {
-        const checkboxes = document.querySelectorAll(".arquivo-check:checked");
-        if (checkboxes.length === 0) {
-            alert("Selecione pelo menos um ficheiro para eliminar.");
-            return;
-        }
-
-        checkboxes.forEach(cb => {
-            const nomeFicheiro = cb.nextSibling.textContent;
-            const index = ficheirosSimulados.indexOf(nomeFicheiro);
-            if (index > -1) ficheirosSimulados.splice(index, 1);
+    try {
+        const response = await fetch('http://localhost:3000/ficheiros', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ids })
         });
 
-        renderizarLista(pesquisaInput.value);
-    });
+        const resultado = await response.json();
+        alert(resultado.message);
 
-    renderizarLista();
+        carregarFicheiros(); // Recarregar tabela
+    } catch (error) {
+        console.error("Erro ao eliminar ficheiros:", error);
+        alert("Erro ao eliminar ficheiros.");
+    }
+});
+
+// ✅ Carrega a lista ao abrir a aba Visualizar Dados
+document.getElementById('menuVisualizarDados').addEventListener('click', function () {
+    showContent('visualizarDadosContent');
+    carregarFicheiros();
+});
+
 
     // 🧠 Tela de Previsão (simulação)
     const ficheirosPrevisao = ["alunos_1.csv", "estatisticas_matematica.csv", "ano2023_dados.csv"];

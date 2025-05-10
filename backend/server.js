@@ -233,6 +233,55 @@ app.post('/upload-csv', csvUpload.single('ficheiro_csv'), (req, res) => {
     );
 });
 
+// ==================== NOVAS ROTAS PARA VISUALIZAR E APAGAR FICHEIROS ====================
+
+// Buscar todos os ficheiros CSV carregados
+app.get('/ficheiros', (req, res) => {
+    db.query('SELECT id, nome_ficheiro FROM csv_uploads ORDER BY data_upload DESC', (err, results) => {
+        if (err) {
+            console.error('Erro ao buscar ficheiros:', err);
+            return res.status(500).json({ message: 'Erro ao buscar ficheiros.' });
+        }
+
+        res.status(200).json({ ficheiros: results });
+    });
+});
+
+// Apagar ficheiros selecionados (base de dados + servidor)
+app.delete('/ficheiros', express.json(), (req, res) => {
+    const ids = req.body.ids;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: 'IDs inválidos.' });
+    }
+
+    // Primeiro buscar caminhos físicos para apagar os ficheiros
+    db.query('SELECT caminho FROM csv_uploads WHERE id IN (?)', [ids], (err, rows) => {
+        if (err) {
+            console.error('Erro ao buscar caminhos de ficheiros:', err);
+            return res.status(500).json({ message: 'Erro ao buscar caminhos.' });
+        }
+
+        // Apagar ficheiros fisicamente
+        rows.forEach(row => {
+            fs.unlink(row.caminho, (err) => {
+                if (err) console.warn('Erro ao apagar ficheiro do servidor:', row.caminho);
+            });
+        });
+
+        // Depois apagar da base de dados
+        db.query('DELETE FROM csv_uploads WHERE id IN (?)', [ids], (err) => {
+            if (err) {
+                console.error('Erro ao apagar ficheiros na base de dados:', err);
+                return res.status(500).json({ message: 'Erro ao apagar ficheiros.' });
+            }
+
+            res.status(200).json({ message: 'Ficheiros apagados com sucesso.' });
+        });
+    });
+});
+
+
 
 // ================= INICIAR SERVIDOR =================
 app.listen(port, () => {
