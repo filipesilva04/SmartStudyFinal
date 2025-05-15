@@ -288,7 +288,7 @@ async function carregarFicheiros() {
     try {
         const response = await fetch('http://localhost:3000/ficheiros');
         const ficheiros = await response.json();
-        renderizarTabelaFicheiros(ficheiros);
+        renderizarTabelaFicheiros(ficheiros.ficheiros);
     } catch (error) {
         console.error("Erro ao carregar ficheiros:", error);
     }
@@ -319,7 +319,9 @@ function renderizarTabelaFicheiros(ficheiros) {
 }
 
 // ✅ Eliminar ficheiros selecionados
-document.getElementById('eliminarSelecionados').addEventListener('click', async () => {
+document.getElementById('eliminarSelecionados').addEventListener('click', async (event) => {
+    event.preventDefault();
+
     const selecionados = Array.from(document.querySelectorAll('.ficheiroCheckbox:checked'));
 
     if (selecionados.length === 0) {
@@ -340,7 +342,8 @@ document.getElementById('eliminarSelecionados').addEventListener('click', async 
 
         const resultado = await response.json();
         alert(resultado.message);
-
+        
+        showContent('visualizarDadosContent');
         carregarFicheiros(); // Recarregar tabela
     } catch (error) {
         console.error("Erro ao eliminar ficheiros:", error);
