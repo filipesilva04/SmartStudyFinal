@@ -235,9 +235,9 @@ app.post('/upload-csv', csvUpload.single('ficheiro_csv'), (req, res) => {
 
 // ==================== NOVAS ROTAS PARA VISUALIZAR E APAGAR FICHEIROS ====================
 
-// Buscar todos os ficheiros CSV carregados
+// Buscar todos os ficheiros CSV carregados (incluindo caminho real do ficheiro)
 app.get('/ficheiros', (req, res) => {
-    db.query('SELECT id, nome_ficheiro FROM csv_uploads ORDER BY data_upload DESC', (err, results) => {
+    db.query('SELECT id, nome_ficheiro, caminho FROM csv_uploads ORDER BY data_upload DESC', (err, results) => {
         if (err) {
             console.error('Erro ao buscar ficheiros:', err);
             return res.status(500).json({ message: 'Erro ao buscar ficheiros.' });
@@ -246,6 +246,8 @@ app.get('/ficheiros', (req, res) => {
         res.status(200).json({ ficheiros: results });
     });
 });
+
+
 
 // Apagar ficheiros selecionados (base de dados + servidor)
 app.delete('/ficheiros', express.json(), (req, res) => {

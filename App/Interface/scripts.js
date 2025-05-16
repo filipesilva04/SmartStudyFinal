@@ -322,6 +322,7 @@ function renderizarTabelaFicheiros(ficheiros) {
 document.getElementById('eliminarSelecionados').addEventListener('click', async (event) => {
     event.preventDefault();
 
+
     const selecionados = Array.from(document.querySelectorAll('.ficheiroCheckbox:checked'));
 
     if (selecionados.length === 0) {
@@ -358,49 +359,90 @@ document.getElementById('menuVisualizarDados').addEventListener('click', functio
 });
 
 
-    // 🧠 Tela de Previsão (simulação)
-    const ficheirosPrevisao = ["alunos_1.csv", "estatisticas_matematica.csv", "ano2023_dados.csv"];
-    const selectFicheiro = document.getElementById("ficheiroSelecionado");
-    const botaoPrever = document.getElementById("botaoPrever");
-    const secaoResultado = document.getElementById("resultadoPrevisao");
-    const tabelaPreview = document.getElementById("tabelaResultadoPrevisao");
+    // 🧠 Tela de Previsão 
+  const selectCsv = document.getElementById("selectCsv");
+    const btnPrever = document.getElementById("btnPrever");
+    const loading = document.getElementById("loadingIndicador");
+    const tabelaResultados = document.getElementById("previewPrevisoes");
+    const resumoBox = document.getElementById("resumoResultados");
+    const exportBox = document.getElementById("exportBox");
+    const btnExportar = document.getElementById("btnExportarCSV");
 
-    ficheirosPrevisao.forEach(nome => {
-        const option = document.createElement("option");
-        option.value = nome;
-        option.textContent = nome;
-        selectFicheiro?.appendChild(option);
+    let ficheiroResultado = "";
+
+    fetch("http://localhost:3000/ficheiros")
+    .then(response => response.json())
+    .then(data => {
+        data.ficheiros.forEach(f => {
+            const opt = document.createElement("option");
+
+            // 👇 solução robusta
+            const partes = f.caminho.split(/[\\/]/);
+            opt.value = partes[partes.length - 1];
+
+            opt.textContent = f.nome_ficheiro;
+            selectCsv.appendChild(opt);
+        });
     });
 
-    botaoPrever?.addEventListener("click", function () {
-        const nomeFicheiro = selectFicheiro.value;
 
-        secaoResultado.classList.remove("hidden");
-        tabelaPreview.innerHTML = "";
+    btnPrever.addEventListener("click", () => {
+        const ficheiro = selectCsv.value;
+        if (!ficheiro) return alert("Selecione um ficheiro.");
 
-        const cabecalho = document.createElement("tr");
-        ["ID", "Nome", "Resultado Previsto"].forEach(titulo => {
-            const th = document.createElement("th");
-            th.textContent = titulo;
-            cabecalho.appendChild(th);
+        loading.classList.remove("hidden");
+        tabelaResultados.innerHTML = "";
+        resumoBox.classList.add("hidden");
+        exportBox.classList.add("hidden");
+
+        fetch("http://localhost:5000/prever", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ficheiro })
+        })
+        .then(response => response.json())
+        .then(data => {
+            loading.classList.add("hidden");
+
+            if (data.erro) {
+                alert("Erro: " + data.erro);
+                return;
+            }
+
+            const amostra = data.amostra;
+            ficheiroResultado = data.ficheiro_resultado;
+            const counts = { aprovado: 0, risco: 0, chumbado: 0 };
+
+            amostra.forEach((linha, i) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${i + 1}</td><td>${linha.previsao}</td>`;
+                tabelaResultados.appendChild(tr);
+
+                const valor = linha.previsao.toLowerCase();
+                if (valor.includes("aprovado")) counts.aprovado++;
+                else if (valor.includes("risco")) counts.risco++;
+                else counts.chumbado++;
+            });
+
+            document.getElementById("aprovadoCount").textContent = counts.aprovado;
+            document.getElementById("riscoCount").textContent = counts.risco;
+            document.getElementById("chumbadoCount").textContent = counts.chumbado;
+
+            resumoBox.classList.remove("hidden");
+            document.getElementById("tabelaResultados").classList.remove("hidden");
+            exportBox.classList.remove("hidden");
+        })
+        .catch(err => {
+            loading.classList.add("hidden");
+            alert("Erro ao comunicar com o servidor Flask.");
+            console.error(err);
         });
-        tabelaPreview.appendChild(cabecalho);
+    });
 
-        for (let i = 1; i <= 5; i++) {
-            const linha = document.createElement("tr");
-            const tdId = document.createElement("td");
-            tdId.textContent = i;
-
-            const tdNome = document.createElement("td");
-            tdNome.textContent = `Aluno ${i}`;
-
-            const tdResultado = document.createElement("td");
-            tdResultado.textContent = i % 2 === 0 ? "Aprovado" : "Chumbado";
-
-            linha.appendChild(tdId);
-            linha.appendChild(tdNome);
-            linha.appendChild(tdResultado);
-            tabelaPreview.appendChild(linha);
-        }
+    btnExportar.addEventListener("click", () => {
+        if (!ficheiroResultado) return;
+        window.open(`/uploads/${ficheiroResultado}`, '_blank');
     });
 });
+
+
