@@ -15,23 +15,28 @@ MODELO_PATH = os.path.join(os.path.dirname(__file__), 'modelo', 'model.pkl')
 modelo = joblib.load(MODELO_PATH)
 
 # Caminho para os CSV carregados
-UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'uploads'))
+UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'uploads'))
 
 
 @app.route('/prever', methods=['POST'])
 def prever():
     dados = request.get_json()
+    print("🔸 JSON recebido:", dados)
+
     nome_ficheiro = dados.get('ficheiro')
+    print("🔹 Nome do ficheiro recebido:", nome_ficheiro)
 
     if not nome_ficheiro:
         return jsonify({'erro': 'Ficheiro não especificado'}), 400
 
     caminho_csv = os.path.join(UPLOAD_FOLDER, nome_ficheiro)
-
     print("🧾 Caminho final do CSV:", caminho_csv)
 
     if not os.path.exists(caminho_csv):
+        print("❌ Ficheiro não encontrado:", caminho_csv)
         return jsonify({'erro': 'Ficheiro não encontrado'}), 404
+
+
 
     try:
         df = pd.read_csv(caminho_csv, sep=';', encoding='utf-8')
