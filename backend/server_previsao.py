@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import pandas as pd
 import joblib
@@ -17,6 +17,9 @@ modelo = joblib.load(MODELO_PATH)
 # Caminho para os CSV carregados
 UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'uploads'))
 
+# Caminho para guardar resultados exportáveis
+DOWNLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 'downloads'))
+os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 @app.route('/prever', methods=['POST'])
 def prever():
@@ -36,8 +39,6 @@ def prever():
         print("❌ Ficheiro não encontrado:", caminho_csv)
         return jsonify({'erro': 'Ficheiro não encontrado'}), 404
 
-
-
     try:
         df = pd.read_csv(caminho_csv, sep=';', encoding='utf-8')
         previsoes = modelo.predict(df)
@@ -45,9 +46,9 @@ def prever():
         df_resultado = df.copy()
         df_resultado['previsao'] = previsoes
 
-        # Gerar ficheiro com resultados
+        # Guardar o ficheiro na pasta de downloads
         nome_saida = f'resultado_{nome_ficheiro}'
-        caminho_saida = os.path.join(UPLOAD_FOLDER, nome_saida)
+        caminho_saida = os.path.join(DOWNLOAD_FOLDER, nome_saida)
         df_resultado.to_csv(caminho_saida, sep=';', index=False)
 
         # Enviar amostra de 5 linhas com previsão
@@ -56,6 +57,10 @@ def prever():
 
     except Exception as e:
         return jsonify({'erro': f'Erro na previsão: {str(e)}'}), 500
+
+@app.route('/download/<filename>', methods=['GET'])
+def download(filename):
+    return send_from_directory(DOWNLOAD_FOLDER, filename, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

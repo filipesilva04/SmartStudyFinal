@@ -728,3 +728,63 @@ body.dark-mode .exportar-btn {
 body.dark-mode .exportar-btn:hover {
     background-color: #00695c;
 }
+
+.resultado-linhas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.resumo-previsao,
+.amostra-previsao {
+  flex: 1;
+  min-width: 280px;
+  background: #f9fdf9;
+  border-radius: 12px;
+  padding: 20px 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.resumo-previsao h4,
+.amostra-previsao h4 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #2e7d32;
+}
+
+.resumo-previsao ul {
+  list-style: none;
+  padding-left: 0;
+  font-size: 16px;
+}
+
+.resumo-previsao li {
+  margin-bottom: 6px;
+}
+
+.amostra-previsao table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background-color: white;
+  border: 1px solid #ddd;
+}
+
+.amostra-previsao th,
+.amostra-previsao td {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ccc;
+}
+
+.menu-item.sair {
+  color: #d9534f;
+  font-weight: bold;
+}
+
+.menu-item.sair:hover {
+  background-color: #f8d7da;
+  color: #a94442;
+}

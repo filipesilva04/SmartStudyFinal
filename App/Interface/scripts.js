@@ -412,60 +412,80 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
   btnPrever.addEventListener("click", () => {
-    const ficheiro = selectCsv.value;
-    if (!ficheiro) return alert("Selecione um ficheiro.");
+  const ficheiro = selectCsv.value;
+  if (!ficheiro) return alert("Selecione um ficheiro.");
 
-    loading.classList.remove("hidden");
-    tabelaResultados.innerHTML = "";
-    resumoBox.classList.add("hidden");
-    exportBox.classList.add("hidden");
+  loading.classList.remove("hidden");
+  tabelaResultados.innerHTML = "";
+  resumoBox.classList.add("hidden");
+  exportBox.classList.add("hidden");
 
-    fetch("http://localhost:5000/prever", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ficheiro }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        loading.classList.add("hidden");
+  fetch("http://localhost:5000/prever", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ficheiro }),
+  })
+    .then(async (response) => {
+      const data = await response.json();
+      console.log("📥 RESPOSTA DO FLASK:", data);
+      console.log("📦 Status HTTP:", response.status);
 
-        if (data.erro) {
-          alert("Erro: " + data.erro);
-          return;
-        }
+      loading.classList.add("hidden");
 
-        const amostra = data.amostra;
-        ficheiroResultado = data.ficheiro_resultado;
-        const counts = { aprovado: 0, risco: 0, chumbado: 0 };
+      if (!response.ok) {
+        alert("Erro: " + (data.erro || "Erro inesperado."));
+        return;
+      }
 
-        amostra.forEach((linha, i) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${i + 1}</td><td>${linha.previsao}</td>`;
-          tabelaResultados.appendChild(tr);
+      const amostra = data.amostra;
+      ficheiroResultado = data.ficheiro_resultado;
+      const counts = { aprovado: 0, risco: 0, chumbado: 0 };
 
-          const valor = linha.previsao.toLowerCase();
-          if (valor.includes("aprovado")) counts.aprovado++;
-          else if (valor.includes("risco")) counts.risco++;
-          else counts.chumbado++;
-        });
+      amostra.forEach((linha, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${i + 1}</td><td>${linha.previsao}</td>`;
+        tabelaResultados.appendChild(tr);
 
-        document.getElementById("aprovadoCount").textContent = counts.aprovado;
-        document.getElementById("riscoCount").textContent = counts.risco;
-        document.getElementById("chumbadoCount").textContent = counts.chumbado;
-
-        resumoBox.classList.remove("hidden");
-        document.getElementById("tabelaResultados").classList.remove("hidden");
-        exportBox.classList.remove("hidden");
-      })
-      .catch((err) => {
-        loading.classList.add("hidden");
-        alert("Erro ao comunicar com o servidor Flask.");
-        console.error(err);
+        const valor = linha.previsao.toLowerCase();
+        if (valor.includes("aprovado")) counts.aprovado++;
+        else if (valor.includes("risco")) counts.risco++;
+        else counts.chumbado++;
       });
-  });
+
+      document.getElementById("aprovadoCount").textContent = counts.aprovado;
+      document.getElementById("riscoCount").textContent = counts.risco;
+      document.getElementById("chumbadoCount").textContent = counts.chumbado;
+
+      resumoBox.classList.remove("hidden");
+      document.getElementById("tabelaResultados")?.classList.remove("hidden");
+
+      // 🔍 DEBUG do botão
+      console.log("📌 Export box:", exportBox);
+      console.log("📌 Export button:", btnExportar);
+
+      exportBox.classList.remove("hidden");
+
+      // Forçar mostrar o botão se ainda estiver escondido
+      btnExportar.style.display = "block";
+    })
+    .catch((err) => {
+      loading.classList.add("hidden");
+      console.error("❌ Erro com Flask:", err);
+      alert("Erro ao comunicar com o servidor Flask.");
+    });
+});
+
 
   btnExportar.addEventListener("click", () => {
-    if (!ficheiroResultado) return;
-    window.open(`/uploads/${ficheiroResultado}`, "_blank");
+  if (!ficheiroResultado) return;
+  window.location.href = `http://localhost:5000/download/${ficheiroResultado}`;
   });
+
+});
+
+document.getElementById("menuSair").addEventListener("click", () => {
+  // Limpa dados do utilizador (se necessário)
+  localStorage.clear(); // ou sessionStorage.clear() dependendo do teu sistema
+  // Redireciona para a página de login
+  window.location.href = "login.html"; // substitui pelo nome real do teu ficheiro de login
 });
